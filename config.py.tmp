@@ -1,0 +1,45 @@
+#!/user/env python3
+# -*- coding: utf-8 -*-
+
+
+class EmptyObject:
+    pass
+
+
+class Config:
+    def __init__(self, test=True):
+        self.test = test
+        self.stop_signal = False
+        self.stop_ok = []
+        self.stop_need_obj = ("incoming",)
+        if test:
+            self.node = [("127.0.0.1", 8293), ("nukowallet.com", 8293)]
+            self.screen = ""
+            self.account_pubkey = ""
+            self.account_seckey = ""
+            self.genesis = "0x1a505395bfe4b2a8eef2f80033d68228db70e82bb695dd4ffb20e6d0cf71cb73"
+            self.db = {
+                "host": "127.0.0.1", "user": "peg",
+                "pass": "Q3h5GP", "db": "pegger_test",
+                "charset": 'utf8mb4'
+            }
+            self.ws_host = "ws://153.122.86.46:8080"
+            self.rest_host = "127.0.0.1"
+
+        else:
+            self.node = [("127.0.0.1", 8293), ("nukowallet.com", 8293)]
+            self.screen = ""
+            self.account_pubkey = ""
+            self.account_seckey = ""
+            self.genesis = "0x1a505395bfe4b2a8eef2f80033d68228db70e82bb695dd4ffb20e6d0cf71cb73"
+            self.db = {
+                "host": "127.0.0.1", "user": "peg",
+                "pass": "Q3h5GP", "db": "pegger",
+                "charset": 'utf8mb4'
+            }
+            self.ws_host = "ws://153.122.86.46:8088"
+
+
+WEI_TO_MICRO = 1000000000000  # 小数点以下6桁
+WEI_TO_NUKO = 1000000000000000000
+LOCAL_IP_ADDRESS = ("127.0.0.1", "localhost")

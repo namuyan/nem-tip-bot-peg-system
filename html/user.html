@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <title>--user page--</title>
+</head>
+<!-- login page -->
+<body>
+<div class="container theme-showcase" role="main">
+    <!-- header -->
+  <div class="jumbotron">
+    <h1>Nekonium Pegtoken System</h1>
+    <p><a href="http://nekonium.github.io/">Nekonium</a>の通貨単位 <b>Nuko</b> とNEMのMosaic <b>namuyan:nekonium</b>
+    を交換するシステムです。これはTipnem上でNekoniumを投げ合う為に作り出されました。</p>
+  </div>
+
+
+    <div class="row">
+        <!-- user data -->
+        <div class="col-sm-6">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">screen name</h3>
+            </div>
+            <div class="panel-body">@%s<!-- screen name --></div>
+          </div>
+          <div class="panel panel-primary">
+            <div class="panel-heading">
+              <h3 class="panel-title">balance</h3>
+            </div>
+            <div class="panel-body">
+                deposit %s NUKO<br>
+                withdraw %s NUKO<br>
+                inner %s NUKO<br>
+                <b>total %s NUKO</b>
+            </div>
+          </div>
+          <div class="panel panel-success">
+            <div class="panel-heading">
+              <h3 class="panel-title">tag amount & deposit address</h3>
+            </div>
+            <div class="panel-body">
+                %s NUKO <!-- tag amount --><br>
+                %s
+            </div>
+          </div>
+        </div><!-- /.col-sm-6 -->
+        <div class="col-sm-6">
+          <div class="panel panel-success">
+            <div class="panel-heading">
+              <h3 class="panel-title">tag address</h3>
+            </div>
+            <div class="panel-body">
+                %s<!-- tag address --><br>
+                <!-- 0x2f8044f5640a5Eaae0a46E7B547fC41cb41bE609</br> -->
+            </div>
+          </div>
+          <div class="panel panel-warning">
+            <div class="panel-heading">
+              <h3 class="panel-title">withdraw now!</h3>
+            </div>
+            <div class="panel-body">
+                <form action="./withdraw.html" method="GET">
+                    address:<input name="address" type="text">　
+                    amount:<input name="amount" type="text">　
+                    <input name="oldest_uuid" value="%d" type="hidden">
+                    <input name="act" value="act" type="submit">
+                    Fee: 0.001 NUKO, Digits: 6
+                </form>
+            </div>
+          </div>
+          <div class="panel panel-danger">
+            <div class="panel-heading">
+              <h3 class="panel-title">convert now!</h3>
+            </div>
+            <div class="panel-body">
+                <form action="./throw.html" method="GET">
+                    amount:<input name="amount" type="text">
+                    <input name="act" value="to token" type="submit">
+                    Digits: 1
+                </form>
+            </div>
+          </div>
+        </div><!-- /.col-sm-6 -->
+
+
+        <div class="col-sm-12">
+          <div class="panel panel-info">
+            <div class="panel-heading">
+              <h3 class="panel-title">inner history</h3>
+            </div>
+            <div class="panel-body">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>uuid</th>
+                        <th>from</th>
+                        <th>to</th>
+                        <th>amount</th>
+                        <th>date</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    %s<!-- inner his -->
+                    <!--<tr>
+                        <td>123</td>
+                        <td>@from_id</td>
+                        <td>@to_id</td>
+                        <td>123.5 NUKO</td>
+                        <td>2017/11/10</td>
+                    </tr>-->
+                    </tbody>
+                </table>
+            </div>
+          </div>
+        </div><!-- /.col-sm-12 -->
+
+
+        <div class="col-sm-12">
+          <div class="panel panel-info">
+            <div class="panel-heading">
+              <h3 class="panel-title">deposit history</h3>
+            </div>
+            <div class="panel-body">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>uuid</th>
+                        <th>address</th>
+                        <th>amount</th>
+                        <th>date</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    %s<!-- deposit his -->
+                    <!--<tr>
+                        <td>123</td>
+                        <td>0x2f8044f5640a5Eaae0a46E7B547fC41cb41bE609</td>
+                        <td>123.535433 NUKO</td>
+                        <td>2017/11/10</td>
+                    </tr>-->
+                    </tbody>
+                </table>
+            </div>
+          </div>
+        </div><!-- /.col-sm-4 -->
+
+
+        <div class="col-sm-12">
+          <div class="panel panel-info">
+            <div class="panel-heading">
+              <h3 class="panel-title">withdraw history</h3>
+            </div>
+            <div class="panel-body">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>uuid</th>
+                        <th>address</th>
+                        <th>amount</th>
+                        <th>date</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    %s<!-- withdraw his -->
+                    <!--<tr>
+                        <td>123</td>
+                        <td>0x2f8044f5640a5Eaae0a46E7B547fC41cb41bE609</td>
+                        <td>123.535433 NUKO</td>
+                        <td>2017/11/10</td>
+                    </tr>-->
+                    </tbody>
+                </table>
+            </div>
+          </div>
+        </div><!-- /.col-sm-4 -->
+    </div>
+</div>
+</body>
+</html>

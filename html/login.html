@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <title>--login page--</title>
+</head>
+<body>
+<div class="container theme-showcase" role="main">
+  <div class="jumbotron">
+    <h1>Nekonium Pegtoken System</h1>
+    <p><a href="http://nekonium.github.io/">Nekonium</a>の通貨単位 <b>Nuko</b> とNEMのMosaic <b>namuyan:nekonium</b>
+    を交換するシステムです。これはTipnem上でNekoniumを投げ合う為に作り出されました。</p>
+  </div>
+  <div class="jumbotron">
+    <div style="padding: 10px;">
+      <form name="chbox" id="form_id">
+        <p>注意事項</p>
+        <input type="checkbox" value="1"> このペグトークンは個人的な趣味により運営されており商業的な意図はないです。<br>
+        <input type="checkbox" value="2"> このシステムの利用により何かしら不利益を被ったとしてもシステム運営者に責任は無く、また賠償を請求しません。<br>
+        <input type="checkbox" value="3"> このシステムを反社会的な目的の為に用いない。<br>
+        <input type="checkbox" value="4"> このシステムをマネーロンダリングの手段として用いない。<br>
+        <input type="checkbox" value="5"> 意図的にシステムを悪用せず、システムのバグを発見した場合は運営者に報告します。<br>
+        <input type="checkbox" value="6"> これはクローズドなテストであり一般公開されていないシステムです。
+      </form>
+    </div>
+    <button class="btn btn-lg btn-primary" type="button" onclick="on_click();">注意事項を理解した上でシステムを利用する</button>
+  </div>
+</div>
+<div class="jumbotron">
+  <p>details</p>
+  <ul>
+    <li>E-mail: nekopeg[atto-mark]yahooo,coo,jp</li>
+    <li>twitter: <a href="https://twitter.com/nekopeg">@nekopeg</a></li>
+    <li>nekonium: <a href="https://nekonium.github.io/">nekonium.github.io</a></li>
+  </ul>
+</div>
+</body>
+<script>
+  function on_click(){
+    //for文でチェックボックスを１つずつ確認
+    for( i=0; i<6; i++ ){
+      //チェックされているか確認する
+      if( document.chbox.elements[i].checked == false ){
+        return false;
+      }
+    }
+    window.location.href = "%s";
+  }
+</script>
+</html>
