@@ -23,6 +23,13 @@ class Config:
                 "pass": "Q3h5GP", "db": "pegger_test",
                 "charset": 'utf8mb4'
             }
+            self.twitter = {
+                "consumer_key": "",
+                "consumer_secret": "",
+                "access_token": "",
+                "access_token_secret": "",
+                "callback": None
+            }
             self.ws_host = "ws://153.122.86.46:8080"
             self.rest_host = "127.0.0.1"
 
@@ -37,9 +44,17 @@ class Config:
                 "pass": "Q3h5GP", "db": "pegger",
                 "charset": 'utf8mb4'
             }
+            self.twitter = {
+                "consumer_key": "",
+                "consumer_secret": "",
+                "access_token": "",
+                "access_token_secret": "",
+                "callback": None
+            }
             self.ws_host = "ws://153.122.86.46:8088"
+            self.rest_host = "0.0.0.0"
 
 
-WEI_TO_MICRO = 1000000000000  # 小数点以下6桁
-WEI_TO_NUKO = 1000000000000000000
+MICRO_TO_WEI = 1000000000000  # 小数点以下6桁
+NUKO_TO_WEI = 1000000000000000000
 LOCAL_IP_ADDRESS = ("127.0.0.1", "localhost")
