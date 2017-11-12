@@ -55,6 +55,7 @@ class DataBase:
                     cursor.execute("SET character_set_connection=utf8mb4")
                 connect.commit()
                 logging.debug("# db connect!")
+                self.polling()
                 return connect
 
             except Exception as e:
@@ -178,7 +179,13 @@ class DataBase:
         self.cursor.execute(sql, params)
 
     def commit(self):
-        self.connect.commit()
+        try:
+            self.connect.commit()
+        except pymysql.err.OperationalError as e:
+            logging.error(e)
+            if e.find("Lost connection to MySQL server during query") != -1:
+                self.connect = self.create_connection()
+                raise Exception("# I reconnect please retry!")
 
     def rollback(self):
         self.connect.rollback()
@@ -194,3 +201,10 @@ class DataBase:
             return string.replace('\'', '’').replace('`', '‘')
         except:
             return None
+
+    def polling(self):
+        # commitを使用しなくてもコネクション維持できるのか？
+        def _polling():
+            with self.connect.cursor() as cursor:
+                cursor.execute("SHOW TABLES")
+        threading.Timer(3600, _polling).start()

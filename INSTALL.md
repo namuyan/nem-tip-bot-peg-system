@@ -5,7 +5,7 @@
 #### 基本
 * `pip install git+https://github.com/pipermerriam/web3.py.git`
 * `pip install PyMySQL`
-* `pip install msgpack-python`
+* `pip install tweepy`
 * `pip install falcon`
 * `pip install websocket-client`
 * config.py.tmp => config.py にリネーム

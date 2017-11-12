@@ -32,6 +32,19 @@ class TipnemControl(WebSocketClient, DataBase, TwitterClass):
         if data['mosaic'] != "namuyan:nekonium":
             return
 
+        try:  # 残高を確定させる
+            ok, result = self.request(command='account/history/check', data={'uuid': data['uuid']})
+            if not ok:
+                logging.error(result)
+                return
+
+        except Exception as e:
+            logging.error("failed 'account/history/check' %s" % e)
+            logging.error(data)
+            return
+
+
+
         try:
             amount_micro = round(data['amount'] * 10 ** 6 / 10)
             user_data = self.get_user_data(screen=data['sender'][1:])
@@ -46,7 +59,7 @@ class TipnemControl(WebSocketClient, DataBase, TwitterClass):
                 cursor.execute(sql % params)
             self.commit()
         except Exception as e:
-            logging.error(e)
+            logging.error("failed record %s" % e)
             logging.error(data)
             return
 
@@ -69,6 +82,12 @@ class TipnemControl(WebSocketClient, DataBase, TwitterClass):
         with self.connect.cursor() as cursor:
             sql = "INSERT INTO `inner_transaction` (`uuid`,`sender`,`recipient`,`amount`,`time`) VALUES"
             for uuid in uuid_set_tipnem - uuid_set_db:
+                # 残高を確定させる
+                ok, result = self.request(command='account/history/check', data={'uuid': uuid})
+                if not ok:
+                    logging.error(result)
+                    # continue
+
                 his = history[uuid]
                 if his['mosaic_name'] != 'namuyan:nekonium':
                     continue
