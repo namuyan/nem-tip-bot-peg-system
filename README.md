@@ -34,7 +34,7 @@ Tipnemを用いたペクトークン発行システムを構築していまし�
 5. 一度アドレスとユーザーを固定したら変更できません。
 
 ## リンク
-* [http://45.76.98.26:8000/login.html](http://45.76.98.26:8000/login.html)
+* [ペグシステム](http://cdn-ak.f.st-hatena.com/images/fotolife/s/s54kan/20080716/20080716004919.png)
 * [アドレス作成](http://www.nukowallet.com/)
 * [INSTALL](INSTALL.md)
 * [Tipnem](https://namuyan.github.io/nem-tip-bot/index)
