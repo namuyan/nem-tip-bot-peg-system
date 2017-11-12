@@ -212,7 +212,7 @@ class IndexPage(TwitterClass, DataBase):
                     "recipient": "@" + session['screen'],
                     "mosaic": "namuyan:nekonium",
                     "amount": amount_tipnem,
-                    "txt": "Nekonium pegtoken system",
+                    "text": "Nekonium pegtoken system",
                     "announce": True
                 }
                 ok, result = self.obj.tip.request(command='account/throw', data=data)
