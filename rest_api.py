@@ -280,7 +280,9 @@ class IndexPage(TwitterClass, DataBase):
 
     def get_tipbot_balance(self):
         ok, result = self.obj.tip.request(command='account/balance', data='')
-        if not ok:
+        if not ok and result == 'command not found or level is low.':
+            return -1
+        elif not ok:
             logging.error(result)
             return 0
         return result['all']['namuyan:nekonium'] if 'namuyan:nekonium' in result['all'] else 0

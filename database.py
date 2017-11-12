@@ -138,12 +138,18 @@ class DataBase:
             except:
                 return None
 
-    def twitter_to_user_id(self, twitter_id, screen):
+    def twitter_to_user_id(self, twitter_id, screen, commit=True):
         with self.connect.cursor() as cursor:
-            sql = "SELECT `user_id` FROM `bind_user` WHERE `twitter_id`='%d'"
+            sql = "SELECT `user_id`,`screen` FROM `bind_user` WHERE `twitter_id`='%d'"
             cursor.execute(sql % twitter_id)
             data = cursor.fetchone()
-            if data:
+            if data is not None and screen == data['screen']:
+                return data['user_id']
+            elif data is not None:
+                sql = "UPDATE `bind_user` SET `screen`='%s' WHERE `twitter_id`='%d'"
+                cursor.execute(sql % (screen, twitter_id))
+                if commit:
+                    self.commit()
                 return data['user_id']
             else:
                 user_id = random.randint(INT_MAX // 10, INT_MAX)
