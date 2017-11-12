@@ -77,6 +77,7 @@ class WebSocketClient:
            "data": data,
            "uuid": uuid
         }
+        logging.debug("id:%d,msg:%s" % (uuid, message))
         self.ws.send(json.dumps(message))
         if blocking is False:
             return uuid
@@ -90,9 +91,10 @@ class WebSocketClient:
                 else:
                     r = self.result[uuid]
                     del(self.result[uuid])
-                return r['result'], r['data']
+                    return r['result'], r['data']
         else:
-            raise TimeoutError("[%s] [%s]" % (command, data))
+            logging.error("result: %s" % self.result)
+            raise TimeoutError("timeout [%s] [%s] [%d]" % (uuid, command, data))
 
     """ request """
     @staticmethod

@@ -22,28 +22,29 @@ class TipnemControl(WebSocketClient, DataBase, TwitterClass):
 
     # over write
     def nis_block(self, ws, data):
-        logging.info(list(data.values()))
+        pass
+        # logging.info(list(data.values()))
 
     # over write
     def tip_receive(self, ws, data):
-        logging.info(list(data.values()))
+        logging.info("websocket 'tip/receive' %s" % list(data.values()))
         if data['recipient'] != "@" + self.config.screen:
+            logging.debug("# not recipient %s" % data['recipient'] )
             return
         if data['mosaic'] != "namuyan:nekonium":
+            logging.debug("# not mosaic %s" % data['mosaic'])
             return
 
         try:  # 残高を確定させる
             ok, result = self.request(command='account/history/check', data={'uuid': data['uuid']})
             if not ok:
-                logging.error(result)
+                logging.error("残高確定失敗 %s" % result)
                 return
 
         except Exception as e:
             logging.error("failed 'account/history/check' %s" % e)
             logging.error(data)
             return
-
-
 
         try:
             amount_micro = round(data['amount'] * 10 ** 6 / 10)
