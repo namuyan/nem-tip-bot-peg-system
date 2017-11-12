@@ -85,16 +85,16 @@ class WebSocketClient:
         time_span = 0.005  # 1mS
         for c in range(int(self.timeout / time_span)):
             time.sleep(time_span)
-            with self.result_lock:
-                if uuid not in self.result:
-                    continue
-                else:
+            if uuid not in self.result:
+                continue
+            else:
+                with self.result_lock:
                     r = self.result[uuid]
                     del(self.result[uuid])
                     return r['result'], r['data']
-        else:
-            logging.error("result: %s" % self.result)
-            raise TimeoutError("timeout [%s] [%s] [%d]" % (uuid, command, data))
+
+        logging.error("result: %s" % self.result)
+        raise TimeoutError("timeout [%s] [%s] [%s]" % (uuid, command, data))
 
     """ request """
     @staticmethod

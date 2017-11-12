@@ -8,7 +8,9 @@ from twitter_lib import TwitterClass
 import threading
 import logging
 import time
+import queue
 
+streaming_tip_receive_que = queue.LifoQueue()
 
 class TipnemControl(WebSocketClient, DataBase, TwitterClass):
     def __init__(self, mycfg):
@@ -26,46 +28,52 @@ class TipnemControl(WebSocketClient, DataBase, TwitterClass):
         # logging.info(list(data.values()))
 
     # over write
-    def tip_receive(self, ws, data):
+    @staticmethod
+    def tip_receive(ws, data):
         logging.info("websocket 'tip/receive' %s" % list(data.values()))
-        if data['recipient'] != "@" + self.config.screen:
-            logging.debug("# not recipient %s" % data['recipient'] )
-            return
-        if data['mosaic'] != "namuyan:nekonium":
-            logging.debug("# not mosaic %s" % data['mosaic'])
-            return
+        streaming_tip_receive_que.put((ws, data))
 
-        try:  # 残高を確定させる
-            ok, result = self.request(command='account/history/check', data={'uuid': data['uuid']})
-            if not ok:
-                logging.error("残高確定失敗 %s" % result)
-                return
+    def _tip_receive(self):
+        while True:
+            ws, data = streaming_tip_receive_que.get()
+            if data['recipient'] != "@" + self.config.screen:
+                logging.debug("# not recipient %s" % data['recipient'] )
+                continue
+            if data['mosaic'] != "namuyan:nekonium":
+                logging.debug("# not mosaic %s" % data['mosaic'])
+                continue
 
-        except Exception as e:
-            logging.error("failed 'account/history/check' %s" % e)
-            logging.error(data)
-            return
+            try:  # 残高を確定させる
+                ok, result = self.request(command='account/history/check', data={'uuid': data['uuid']})
+                if not ok:
+                    logging.error("残高確定失敗 %s" % result)
+                    continue
 
-        try:
-            amount_micro = round(data['amount'] * 10 ** 6 / 10)
-            user_data = self.get_user_data(screen=data['sender'][1:])
-            twitter_id = user_data.id
-            user_id = self.twitter_to_user_id(twitter_id, user_data.screen_name)
-            controller_id = 1  # 外部は１
+            except Exception as e:
+                logging.error("failed 'account/history/check' %s" % e)
+                logging.error(data)
+                continue
 
-            with self.connect.cursor() as cursor:
-                sql = "INSERT INTO `inner_transaction` SET `uuid`='%d',`sender`='%d',`recipient`='%d'," \
-                      "`amount`='%d',`time`='%d'"
-                params = (data['uuid'], controller_id, user_id, amount_micro, data['time'])
-                cursor.execute(sql % params)
-            self.commit()
-        except Exception as e:
-            logging.error("failed record %s" % e)
-            logging.error(data)
-            return
+            try:
+                amount_micro = round(data['amount'] * 10 ** 6 / 10)
+                user_data = self.get_user_data(screen=data['sender'][1:])
+                twitter_id = user_data.id
+                user_id = self.twitter_to_user_id(twitter_id, user_data.screen_name)
+                controller_id = 1  # 外部は１
 
-        logging.info("# throwed from id:%d" % data['uuid'])
-        return
+                with self.connect.cursor() as cursor:
+                    sql = "INSERT INTO `inner_transaction` SET `uuid`='%d',`sender`='%d',`recipient`='%d'," \
+                          "`amount`='%d',`time`='%d'"
+                    params = (data['uuid'], controller_id, user_id, amount_micro, data['time'])
+                    cursor.execute(sql % params)
+                self.commit()
+            except Exception as e:
+                logging.error("failed record %s" % e)
+                logging.error(data)
+                continue
+
+            logging.info("# throwed from id:%d" % data['uuid'])
+            continue
 
     def _control(self):
         history = self.get_all_history()
@@ -141,7 +149,7 @@ class TipnemControl(WebSocketClient, DataBase, TwitterClass):
         else:
             logging.error("# failed get all history")
 
-    def start_control(self, name="control"):
+    def start_control(self):
         while True:
             time.sleep(10)
             if self.obj.income.finish == 1:
@@ -155,9 +163,13 @@ class TipnemControl(WebSocketClient, DataBase, TwitterClass):
             return
         else:
             threading.Thread(
-                target=self._control, name=name, daemon=True
+                target=self._control, name='control', daemon=True
             ).start()
             logging.info("# start control thread")
+            threading.Thread(
+                target=self._tip_receive, name='on_receive', daemon=True
+            ).start()
+            logging.info("# start on_receive thread")
 
     def make_connection_with_console(self):
         retry = 0
