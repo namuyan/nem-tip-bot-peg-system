@@ -28,7 +28,7 @@ database_dict = {
         'PRIMARY KEY (uuid)'
     ],
     "inner_transaction": [
-        'uuid INT UNSIGNED NOT NULL AUTO_INCREMENT',
+        'uuid INT UNSIGNED NOT NULL',
         'sender INT NOT NULL',
         'recipient INT NOT NULL',
         'amount BIGINT UNSIGNED NOT NULL',
@@ -36,7 +36,7 @@ database_dict = {
         'PRIMARY KEY (uuid)'
     ],
     "bind_user": [
-        'user_id INT UNSIGNED NOT NULL AUTO_INCREMENT',
+        'user_id INT UNSIGNED NOT NULL',
         'twitter_id BIGINT UNSIGNED NOT NULL',
         'screen VARCHAR(255)',
         'time INT UNSIGNED',

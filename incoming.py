@@ -133,7 +133,10 @@ class IncomingPolling(DataBase):
                         )
                         sql = "INSERT INTO `bind_address` (`address`,`user_id`,`time`) VALUES ('%s','%d','%d')"
                         cursor.execute(sql % params)
+                        # ダブればここでエラーになる
                         logging.info("# bind user %s=%s" % (user_id['user_id'], address_from))
+                        sql = "UPDATE `incoming` SET `recipient`='%d' WHERE `address`='%s' AND `recipient`='0'"
+                        cursor.execute(sql % (user_id['user_id'], address_from))
                         continue
 
                     # bind_addressによる入金
