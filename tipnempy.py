@@ -29,7 +29,6 @@ class WebSocketClient:
         self.url = url
         self.test = test
         self.ws = None
-        self.ecc = Ed25519()
 
     def _create_connect(self):
         retry = 0
@@ -47,6 +46,21 @@ class WebSocketClient:
                 logging.error(e)
                 logging.error("# retry connect to tipnem after 180s, %s" % retry)
                 time.sleep(180)
+
+    def login_by_key(self, seckey, pubkey, screen):
+        sign = Ed25519.sign(message=self.user_code, secret_key=seckey, public_key=pubkey)
+        data = {
+            "screen_name": "@" + screen,
+            "sign": sign.decode()
+        }
+        ok, result = self.request(command="user/pubkey/login", data=data)
+        if not ok:
+            logging.error("pubkey login %s" % result)
+            return False
+        if result['level'] > 0:
+            logging.info("# auto login! level %d" % result['level'])
+            return True
+        return False
 
     def start(self, name="tipnem"):
         threading.Thread(

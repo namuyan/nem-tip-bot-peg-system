@@ -10,7 +10,9 @@ import logging
 import time
 import queue
 
+
 streaming_tip_receive_que = queue.LifoQueue()
+
 
 class TipnemControl(WebSocketClient, DataBase, TwitterClass):
     def __init__(self, mycfg):
@@ -174,6 +176,8 @@ class TipnemControl(WebSocketClient, DataBase, TwitterClass):
     def make_connection_with_console(self):
         retry = 0
         screen = "@" + self.config.screen
+        if self.login_by_key(self.config.login_seckey, self.config.login_pubkey, self.config.screen):
+            return True
         while retry < 8:
             time.sleep(0.1)
             retry += 1

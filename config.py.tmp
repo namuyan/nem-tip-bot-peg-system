@@ -30,6 +30,8 @@ class Config:
                 "access_token_secret": "",
                 "callback": None
             }
+            self.login_pubkey = None
+            self.login_seckey = None
             self.ws_host = "ws://153.122.86.46:8080"
             self.rest_host = "127.0.0.1"
 
@@ -51,6 +53,8 @@ class Config:
                 "access_token_secret": "",
                 "callback": None
             }
+            self.login_pubkey = None
+            self.login_seckey = None
             self.ws_host = "ws://153.122.86.46:8088"
             self.rest_host = "0.0.0.0"
 
