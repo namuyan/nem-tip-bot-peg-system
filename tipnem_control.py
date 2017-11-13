@@ -11,33 +11,21 @@ import time
 import queue
 
 
-streaming_tip_receive_que = queue.LifoQueue()
-
-
 class TipnemControl(WebSocketClient, DataBase, TwitterClass):
     def __init__(self, mycfg):
         WebSocketClient.__init__(self, url=mycfg.ws_host)
         DataBase.__init__(self, mycfg=mycfg)
         TwitterClass.__init__(self, mycfg=mycfg)
-        self.on_nis_block = self.nis_block
-        self.on_tip_receive = self.tip_receive
         self.config = mycfg
         self.finish = 0
 
-    # over write
-    def nis_block(self, ws, data):
-        pass
-        # logging.info(list(data.values()))
-
-    # over write
-    @staticmethod
-    def tip_receive(ws, data):
-        logging.info("websocket 'tip/receive' %s" % list(data.values()))
-        streaming_tip_receive_que.put((ws, data))
-
-    def _tip_receive(self):
+    def _streaming(self):
         while True:
-            ws, data = streaming_tip_receive_que.get()
+            command, data, time_sec = self.streaming_que.get()
+            logging.debug("websocket '%s' %s" % (command, data))
+
+            if command != 'tip/receive':
+                continue
             if data['recipient'] != "@" + self.config.screen:
                 logging.debug("# not recipient %s" % data['recipient'] )
                 continue
@@ -169,7 +157,7 @@ class TipnemControl(WebSocketClient, DataBase, TwitterClass):
             ).start()
             logging.info("# start control thread")
             threading.Thread(
-                target=self._tip_receive, name='on_receive', daemon=True
+                target=self._streaming, name='streaming', daemon=True
             ).start()
             logging.info("# start on_receive thread")
 

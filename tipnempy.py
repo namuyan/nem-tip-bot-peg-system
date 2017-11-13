@@ -64,6 +64,24 @@ class WebSocketClient:
             return True
         return False
 
+    def login_by_pin(self, screen):
+        while True:
+            print()
+            data = {"screen_name": screen}
+            ok, result = self.request(command="user/offer", data=data)
+            if not ok and result != "pincode has been already created.":
+                print("# failed login: ", result)
+                continue
+
+            pin_code = input("pincode >> ")
+            data = {"screen_name": screen, "pincode": int(pin_code)}
+            ok, result = self.request(command="user/check", data=data)
+            if not ok:
+                print("# failed login: ", result)
+                continue
+
+            print("# login OK!")
+
     def start(self, name="tipnem"):
         threading.Thread(
             target=self._create_connect, name=name, daemon=True
@@ -134,14 +152,15 @@ class WebSocketClient:
 
         elif self.check_key(('type', 'command'), data):
             if data['type'] == 'streaming':
-                if data['command'] == 'nis/block':
-                    self.on_nis_block(ws, data['data'])
-                elif data['command'] == 'nis/incoming':
-                    self.on_nis_incoming(ws, data['data'])
-                elif data['command'] == 'tip/receive':
-                    self.on_tip_receive(ws, data['data'])
-                else:
-                    raise Exception("unknown command '%s'" % data['command'])
+                try:
+                    item = (data['command'], data['data'], data['time'])
+                    self.streaming_que.put_nowait(item=item)
+                except queue.Full:
+                    pass
+                except Exception as e:
+                    logging.error(e)
+                    import traceback
+                    traceback.print_exc()
 
             elif data['type'] == 'request':
                 with self.result_lock:
@@ -169,23 +188,9 @@ class WebSocketClient:
         self.ws = ws
         logging.info("open: %s" % ws)
 
-    """ streaming """
-    def on_nis_block(self, ws, data):
-        if self.height != data['height']:
-            logging.debug("nis/block  %s" % data)
-            self.height = data['height']
 
-    def on_nis_incoming(self, ws, data):
-        logging.debug("nis/incoming  %s" % data)
-        pass
-
-    def on_tip_receive(self, ws, data):
-        logging.debug("tip/receive  %s" % data)
-        pass
-
-
-""" テストコード """
-if __name__ == '__main__':
+def test():
+    """ テストコード """
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter('[%(levelname)-6s] [%(threadName)-10s] [%(asctime)-24s] %(message)s')
@@ -198,32 +203,18 @@ if __name__ == '__main__':
 
     ws = WebSocketClient(url="ws://153.122.86.46:8088")
     ws.start()
-    print(ws.request(command="bot/info"))
+    ws.login_by_pin(screen=input("screen >> "))
 
     while True:
-        print()
-        screen = input("screen >> ")
-        data = {"screen_name": screen}
-        ok, result = ws.request(command="user/offer", data=data)
-        if not ok and result != "pincode has been already created.":
-            print("# failed login: ", result)
-            continue
+        try:
+            print()
+            command = input("cmd >> ")
+            data = json.loads(input("data >> "))
+            ok, result = ws.request(command=command, data=data)
+            print(ok)
+            print(result)
+        except Exception as e:
+            print("Error", e)
 
-        pin_code = input("pincode >> ")
-        data = {"screen_name": screen, "pincode": int(pin_code)}
-        ok, result = ws.request(command="user/check", data=data)
-        if not ok:
-            print("# failed login: ", result)
-            continue
-
-        print("# login OK!")
-        while True:
-            try:
-                print()
-                command = input("cmd >> ")
-                data = json.loads(input("data >> "))
-                ok, result = ws.request(command=command, data=data)
-                print(ok)
-                print(result)
-            except:
-                pass
+if __name__ == '__main__':
+    test()
