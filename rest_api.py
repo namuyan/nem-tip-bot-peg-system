@@ -221,11 +221,15 @@ class IndexPage(TwitterClass, DataBase):
                 uuid = result['uuid']
                 controller_id = 1
 
-                with self.connect.cursor() as cursor:
-                    sql = "INSERT INTO `inner_transaction` SET `uuid`='%d',`sender`='%d'," \
-                          "`recipient`='%d',`amount`='%d',`time`='%d'"
-                    cursor.execute(sql % (uuid, session['user_id'], controller_id, amount_micro, now))
-                self.commit()
+                try:
+                    with self.connect.cursor() as cursor:
+                        sql = "INSERT INTO `inner_transaction` SET `uuid`='%d',`sender`='%d'," \
+                              "`recipient`='%d',`amount`='%d',`time`='%d'"
+                        cursor.execute(sql % (uuid, session['user_id'], controller_id, amount_micro, now))
+                    self.commit()
+                except Exception as e:
+                    self.obj.tip.request(command='account/history/delete', data={"uuid": result['uuid']})
+                    return "danger", "Failed!", e
             return "success", "Success!", "converted, check with xembook!"
 
         elif select_page == 'template.html':
