@@ -109,11 +109,12 @@ class IndexPage(TwitterClass, DataBase):
             inner_balance = display(inner_balance, 6)
 
             tag_amount = display(session['user_id'], 18)
-            tag_address = "<br>".join(self.get_tag_address(session['user_id']))
+            tag_address = "<br>".join([a[:30] + "..." for a in self.get_tag_address(session['user_id'])])
+            if len(tag_address) < 10:
+                tag_address = '<span style="color:red;">Please deposit the amount to this address FIRST!</span>'
             inner_his = self.inner_balance(user_id=session['user_id'], summary=False)
             deposit_his = self.deposit_balance(user_id=session['user_id'], summary=False)
             withdraw_his = self.withdraw_balance(user_id=session['user_id'], summary=False)
-            name = ["GOX", "outside"]
             inner_his = "\n".join([
                 "<tr><td>%d</td><td>@%s</td><td>@%s</td><td>%s NUKO</td><td>%s</td></tr>" % (
                 e['uuid'], self.user_to_screen(e['sender']), self.user_to_screen(e['recipient']),

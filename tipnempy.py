@@ -4,6 +4,7 @@
 from ed25519 import Ed25519
 import websocket
 import threading
+import queue
 import logging
 import time
 import json
@@ -22,6 +23,7 @@ class WebSocketClient:
     timeout = 60
     result = dict()
     result_lock = threading.Lock()
+    streaming_que = queue.LifoQueue(maxsize=1000)
     user_code = None
     height = 0
 
