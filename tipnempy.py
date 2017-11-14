@@ -15,7 +15,7 @@ Tipnemを扱うライブラリ
 2017/11/07
 """
 
-version = "1.1"
+version = "1.2"
 author = "namuyan"
 
 

@@ -8,19 +8,17 @@ from ether_interface import EtherInterface
 from tipnem_control import TipnemControl
 from incoming import IncomingPolling
 from rest_api import RestApi
+from log_module import MakeLogging
 import time
 import logging
 import sys
 
 version = "1.0"
 
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter('[%(levelname)-6s] [%(threadName)-10s] [%(asctime)-24s] %(message)s')
-sh = logging.StreamHandler()
-sh.setLevel(logging.DEBUG)
-sh.setFormatter(formatter)
-logger.addHandler(sh)
+""" logging module """
+log_obj = MakeLogging()
+log_obj.make_file_handler()
+log_obj.make_stream_handler()
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("requests").setLevel(logging.WARNING)
 
