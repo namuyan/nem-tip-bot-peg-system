@@ -8,7 +8,7 @@ from twitter_lib import TwitterClass
 import threading
 import logging
 import time
-import queue
+import random
 
 
 class TipnemControl(WebSocketClient, DataBase, TwitterClass):
@@ -62,7 +62,20 @@ class TipnemControl(WebSocketClient, DataBase, TwitterClass):
                 logging.error(data)
                 continue
 
-            logging.info("# throwed from id:%d" % data['uuid'])
+            logging.info("# thrown from id:%d" % data['uuid'])
+            try:
+                # DM経由で相手に通知
+                msg = random.choice((
+                    "しっかり受取った", "間違いなく識別した",
+                    "問題無い", "残高に加えた"
+                )) + random.choice((
+                    "にゃん！", "にゃーご！", "にゃにゃ！", "にゃんぱすー", "ぐるにゃん"
+                )) + "[%s NUKO, id=%d]"
+                self.put_direct_msg(
+                    screen=data['sender'][1:], msgs=msg % (data['amount'] / 10, data['uuid'])
+                )
+            except Exception as e:
+                logging.error(e)
             continue
 
     def _control(self):
