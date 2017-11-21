@@ -39,6 +39,17 @@ def unix2date(t):
     return datetime.fromtimestamp(t).strftime('%Y/%m/%d %H:%M')
 
 
+class FaviconIco:
+    def __init__(self):
+        with open("./html/favicon.ico", mode="br") as f:
+            self.i = f.read()
+
+    def on_get(self, req, resp):
+        resp.status = falcon.HTTP_200
+        resp.content_type = 'image/vnd.microsoft.icon'
+        resp.body = self.i
+
+
 class IndexPage(TwitterClass, DataBase):
     def __init__(self, mycfg):
         TwitterClass.__init__(self, mycfg=mycfg)
@@ -55,8 +66,7 @@ class IndexPage(TwitterClass, DataBase):
         resp.status = falcon.HTTP_200
         resp.content_type = 'text/html'
 
-        if select_page not in ('favicon.ico', 'login.html', 'user.html', 'template.html', 'withdraw.html',
-                               'throw.html'):
+        if select_page not in ('login.html', 'user.html', 'template.html', 'withdraw.html', 'throw.html'):
             # resp.status = falcon.HTTP_400
             # resp.body = "<p>not found page</p>"
             resp.status = falcon.HTTP_301
@@ -304,8 +314,10 @@ class RestApi(threading.Thread):
 
     def run(self):
         app = falcon.API()
+        favicon_ico = FaviconIco()
         index_page = IndexPage(mycfg=self.config)
         index_page.obj = self.obj
+        app.add_route("/favicon.ico", favicon_ico)
         app.add_route("/{select_page}", index_page)
         port = 8000
         httpd = simple_server.make_server(self.config.rest_host, port, app)

@@ -11,6 +11,8 @@ http://code.activestate.com/recipes/579102-ed25519/
 import collections
 import hashlib
 import os
+import random
+import base64
 from binascii import hexlify, unhexlify
 from operator import getitem, methodcaller
 from Crypto.Cipher import AES
@@ -133,14 +135,8 @@ class Ed25519:
         _pk = Ed25519.str2bytes(public_key)
 
         ecc = SignClass()
-        try:
-            encrypted_hex = ecc.encrypt(unhexlify(_sk)[::-1], unhexlify(_pk), _message)
-            return encrypted_hex
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
-            print(e)
-            return False
+        encrypted_hex = ecc.encrypt(unhexlify(_sk)[::-1], unhexlify(_pk), _message)
+        return encrypted_hex
 
     @staticmethod
     def decrypt(private_key, public_key, msg_hex):
@@ -149,16 +145,8 @@ class Ed25519:
         _pk = Ed25519.str2bytes(public_key)
 
         ecc = SignClass()
-        raw_msg = b''
-        try:
-            raw_msg = ecc.decrypt(unhexlify(_sk)[::-1], unhexlify(_pk), _msg_hex)
-            return Ed25519._strip(raw_msg.decode("utf-8", "ignore"))
-
-        except Exception as e:
-            # import traceback
-            # traceback.print_exc()
-            print(e)
-            return Ed25519._strip(Ed25519.decode_utf8mb4(raw_msg))
+        raw_msg = ecc.decrypt(unhexlify(_sk)[::-1], unhexlify(_pk), _msg_hex)
+        return Ed25519._strip(raw_msg)
 
     @staticmethod
     def decode_utf8mb4(byte_str):
@@ -168,16 +156,15 @@ class Ed25519:
         return ''.join(str_list)
 
     @staticmethod
-    def _strip(raw):
-        r_list = [e for e in raw.strip()]
-        end1 = r_list[len(r_list) - 1]
-        end2 = r_list[len(r_list) - 2]
-        if end1 == end2:
-            r_list = [e for e in r_list if e != end1]
-        else:
-            if ord(end1) <= 32:
-                r_list.pop()
-        return ''.join(r_list)
+    def _strip(m):
+        last_word = m[-1]
+        m = m[:-1]
+        while True:
+            if m[-1] == last_word:
+                m = m[:-1]
+                continue
+            else:
+                return m
 
     def recover(self, y):
         """ given a value y, recover the preimage x """
@@ -460,14 +447,23 @@ class SignClass:
         key_int = int.from_bytes(g, 'big') ^ int.from_bytes(salt, 'big')
         shared_key = self.to_hash_sha3_256(key_int.to_bytes(32, 'big'))
         cipher = AES.new(shared_key, AES.MODE_CBC, iv)
-        encrypted_msg = cipher.encrypt(self._padding_by_tab(message))
+        encrypted_msg = cipher.encrypt(self._padding(message))
         return hexlify(salt + iv + encrypted_msg)
 
     @staticmethod
-    def _padding_by_tab(msg):
+    def _padding(msg):
+        padding_list = list(range(15))
+        if msg[-1] <= 15:
+            padding_list.remove(msg[-1])
+        _padding = random.choice(padding_list).to_bytes(1, "big")
         if len(msg) % 16 == 0:
-            return msg
-        return msg + b'\t' * (16 - len(msg) % 16)
+            return msg + _padding * 16
+        elif len(msg) % 16 == 1:
+            return msg + _padding * 15
+        elif len(msg) % 16 == 2:
+            return msg + _padding * 14
+        else:
+            return msg + _padding * (16 - len(msg) % 16)
 
     def decrypt(self, your_sk, sender_pk, message):
         salt = unhexlify(message[:64])
@@ -498,8 +494,6 @@ if __name__ == '__main__':
     PUB2 = '28e8469422106f406051a24f2ea6402bac6f1977cf7e02eb3bf8c11d4070157a'
     PRI2 = '3c60f29c84b63c76ca8e3f1068ad328285ae8d5af2a95aa99ceb83d327dfb97e'
     enc = Ed25519.encrypt(private_key=PRI, public_key=PUB2, message=MSG)
-    import base64
     print(enc)
-    print(base64.b64encode(unhexlify(enc)).decode())
     dec = Ed25519.decrypt(private_key=PRI2, public_key=PUB, msg_hex=enc)
     print(dec)
