@@ -66,7 +66,7 @@ class TipnemControl(WebSocketClient, DataBase, TwitterClass):
             try:
                 # DM経由で相手に通知
                 msg = random.choice((
-                    "しっかり受取った", "間違いなく識別した",
+                    "しっかり受取った", "間違いない",
                     "問題無い", "残高に加えた"
                 )) + random.choice((
                     "にゃん！", "にゃーご！", "にゃにゃ！", "にゃんぱすー", "ぐるにゃん"
