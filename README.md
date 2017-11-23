@@ -37,14 +37,14 @@ Tipnemを用いたペクトークン発行システムを構築していまし�
     
 #### 【入金権限追加方法】
 GETメソッドでsetting.htmlにアクセスします。  
-例 `setting.htnl?screen=example_name`
+例 `setting.html?screen=example_name`
 
 ## リンク
-* [ペグシステム](http://cdn-ak.f.st-hatena.com/images/fotolife/s/s54kan/20080716/20080716004919.png)
+* [ペグシステム](http://nekopeg.tk:8000/login.html)
 * [アドレス作成](http://www.nukowallet.com/)
 * [INSTALL](INSTALL.md)
 * [Tipnem](https://namuyan.github.io/nem-tip-bot/index)
 
 ## 履歴
-* 2017/11/24 入金制限公開テスト開始
+* 2017/11/24 入金制限公開テスト開始、ペグシステムURL公開
 * 2017/11/12 非公開テスト開始
