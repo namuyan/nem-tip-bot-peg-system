@@ -34,6 +34,10 @@ Tipnemを用いたペクトークン発行システムを構築していまし�
     Ex. `@tipnem tip @nekopeg 5 nuko`
 2. convert now!より、`NUKO` をペグトークンに交換できます。
     ※ペグトークンの残高以上の交換は受け付けていません。
+    
+#### 【入金権限追加方法】
+GETメソッドでsetting.htmlにアクセスします。  
+例 `setting.htnl?screen=example_name`
 
 ## リンク
 * [ペグシステム](http://cdn-ak.f.st-hatena.com/images/fotolife/s/s54kan/20080716/20080716004919.png)
@@ -42,5 +46,5 @@ Tipnemを用いたペクトークン発行システムを構築していまし�
 * [Tipnem](https://namuyan.github.io/nem-tip-bot/index)
 
 ## 履歴
-* 2017/11/24 制限公開テスト開始
+* 2017/11/24 入金制限公開テスト開始
 * 2017/11/12 非公開テスト開始
