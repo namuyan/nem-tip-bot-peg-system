@@ -15,7 +15,7 @@ Tipnemを扱うライブラリ
 2017/11/07
 """
 
-version = "1.2"
+version = "2.2"
 author = "namuyan"
 
 
@@ -25,7 +25,8 @@ class WebSocketClient:
     result_lock = threading.Lock()
     streaming_que = queue.LifoQueue(maxsize=1000)
     user_code = None
-    height = 0
+    auto_login_setting = dict()
+    level = 0
 
     def __init__(self, url, test=False):
         self.url = url
@@ -44,12 +45,37 @@ class WebSocketClient:
                 ws.on_open = self.on_open
                 ws.on_error = self.on_error
                 ws.run_forever()
+                if len(self.auto_login_setting) == 3:
+                    logging.error("# disconnect! retry 60s after %s" % retry)
+                    time.sleep(60)
+                    threading.Thread(
+                        target=self.login_by_key, args=(None, None, None),
+                        name="login", daemon=True
+                    ).start()
+                else:
+                    logging.error("# disconnect!")
+                    return
+
             except Exception as e:
                 logging.error(e)
                 logging.error("# retry connect to tipnem after 180s, %s" % retry)
                 time.sleep(180)
 
-    def login_by_key(self, seckey, pubkey, screen):
+    def login_by_key(self, seckey, pubkey, screen, auto_login=False):
+        count = 0
+        while self.user_code is None and count < 100:
+            count += 1
+            time.sleep(0.2)
+        if len(self.auto_login_setting) == 3 and seckey is None:
+            seckey = self.auto_login_setting["seckey"]
+            pubkey = self.auto_login_setting["pubkey"]
+            screen = self.auto_login_setting["screen"]
+        elif auto_login:
+            self.auto_login_setting = {
+                "seckey": seckey,
+                "pubkey": pubkey,
+                "screen": screen
+            }
         sign = Ed25519.sign(message=self.user_code, secret_key=seckey, public_key=pubkey)
         data = {
             "screen_name": "@" + screen,
@@ -61,26 +87,64 @@ class WebSocketClient:
             return False
         if result['level'] > 0:
             logging.info("# auto login! level %d" % result['level'])
+            self.level = result['level']
             return True
         return False
 
-    def login_by_pin(self, screen):
-        while True:
+    def login_by_pin_user(self, level=2):
+        count = 0
+        while count < 20:
+            count += 1
             print()
-            data = {"screen_name": screen}
-            ok, result = self.request(command="user/offer", data=data)
-            if not ok and result != "pincode has been already created.":
-                print("# failed login: ", result)
+            ok, result = self.request(command="user/upgrade", data={"require_level": level})
+            if not ok and result != 'pincode has been already created.':
+                print("# failed upgrade request: ", result)
                 continue
 
-            pin_code = input("pincode >> ")
-            data = {"screen_name": screen, "pincode": int(pin_code)}
+            while True:
+                pin_code = input("pincode >> ")
+                if len(pin_code) != 4:
+                    print("# need 4 letters")
+                    continue
+                break
+            data = {"pincode": int(pin_code)}
+            ok, result = self.request(command="user/check", data=data)
+            if not ok:
+                print("# failed upgrade: ", result)
+                continue
+
+            print("# upgrade OK!")
+            self.level = level
+            return
+        raise Exception("failed upgrade user")
+
+    def login_by_pin_guest(self, screen):
+        count = 0
+        while count < 20:
+            count += 1
+            print()
+            data = {"screen_name": "@" + screen}
+            ok, result = self.request(command="user/offer", data=data)
+            if not ok and result != "pincode has been already created.":
+                print("# failed login request: ", result)
+                continue
+
+            while True:
+                pin_code = input("pincode >> ")
+                if len(pin_code) != 4:
+                    print("# need 4 letters")
+                    continue
+                break
+            data = {"screen_name": "@" + screen, "pincode": int(pin_code)}
             ok, result = self.request(command="user/check", data=data)
             if not ok:
                 print("# failed login: ", result)
                 continue
 
             print("# login OK!")
+            self.level = 1
+            return
+        raise Exception("failed login user")
 
     def start(self, name="tipnem"):
         threading.Thread(
@@ -108,7 +172,7 @@ class WebSocketClient:
         uuid = random.randint(1, 2147483647)
         message = {
            "command": command,
-           "data": data,
+           "data": {"dummy": "data"} if data is None else data,
            "uuid": uuid
         }
         logging.debug("id:%d,msg:%s" % (uuid, message))
@@ -175,14 +239,17 @@ class WebSocketClient:
 
     def on_error(self, ws, error):
         logging.error("error: %s" % error)
-        self.ws.close()
+        self.ws = None
+        self.user_code = None
+        self.result = dict()
+        self.level = 0
 
     def on_close(self, ws):
         logging.info("close: %s" % ws)
-        # self.ws.close()
-        # time.sleep(5)
-        # logging.info("try reconnect")
-        # self.create_connect()
+        self.ws = None
+        self.user_code = None
+        self.result = dict()
+        self.level = 0
 
     def on_open(self, ws):
         self.ws = ws
@@ -191,6 +258,11 @@ class WebSocketClient:
 
 def test():
     """ テストコード """
+    def _streaming(ws):
+        while True:
+            cmd, data, time_sec = ws.streaming_que.get()
+            print(cmd, data, time_sec)
+
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter('[%(levelname)-6s] [%(threadName)-10s] [%(asctime)-24s] %(message)s')
@@ -203,7 +275,11 @@ def test():
 
     ws = WebSocketClient(url="ws://153.122.86.46:8088")
     ws.start()
-    ws.login_by_pin(screen=input("screen >> "))
+    threading.Thread(
+        target=_streaming, args=(ws,), daemon=True
+    ).start()
+    ws.login_by_pin_guest(screen=input("screen >> "))
+    ws.login_by_pin_user()
 
     while True:
         try:
