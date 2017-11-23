@@ -171,6 +171,21 @@ class DataBase:
                     return data['screen']
                 return 'unknown?'
 
+    def add_deposit_permission(self, user_id):
+        with self.connect.cursor() as cursor:
+            sql = "UPDATE `bind_user` SET `deposit_permission`='1' WHERE `user_id`='%d'"
+            cursor.execute(sql % user_id)
+        self.commit()
+
+    def deposit_permission(self, user_id):
+        with self.connect.cursor() as cursor:
+            sql = "SELECT `deposit_permission` FROM `bind_user` WHERE `user_id`='%d'"
+            cursor.execute(sql % user_id)
+            data = cursor.fetchone()
+            if data:
+                return bool(data['deposit_permission'])
+            return False
+
     def get_cursor(self):
         self.cursor = self.connect.cursor()
         # self.cursor.fetchall()

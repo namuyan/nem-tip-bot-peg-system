@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-from tipnempy import WebSocketClient
+from tipnem import WebSocketClient
 from database import DataBase
 from twitter_lib import TwitterClass
 import threading

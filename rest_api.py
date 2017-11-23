@@ -40,6 +40,7 @@ def unix2date(t):
 
 
 class FaviconIco:
+    """ アイコン表示用 """
     def __init__(self):
         with open("./html/favicon.ico", mode="br") as f:
             self.i = f.read()
@@ -66,7 +67,8 @@ class IndexPage(TwitterClass, DataBase):
         resp.status = falcon.HTTP_200
         resp.content_type = 'text/html'
 
-        if select_page not in ('login.html', 'user.html', 'template.html', 'withdraw.html', 'throw.html'):
+        if select_page not in ('login.html', 'user.html', 'template.html', 'withdraw.html',
+                               'throw.html', 'setting.html'):
             # resp.status = falcon.HTTP_400
             # resp.body = "<p>not found page</p>"
             resp.status = falcon.HTTP_301
@@ -118,7 +120,12 @@ class IndexPage(TwitterClass, DataBase):
             withdraw_balance = display(withdraw_balance, 6)
             inner_balance = display(inner_balance, 6)
 
-            tag_amount = display(session['user_id'], 18)
+            if self.deposit_permission(session['user_id']):
+                tag_amount = display(session['user_id'], 18)
+                deposit_info = "{} NUKO<br>{}".format(tag_amount, self.config.account_pubkey)
+            else:
+                deposit_info = '<span style="color:red;">CAUTION! You have not deposit permission.</span>'
+
             tag_address = "<br>".join([a[:30] + "..." for a in self.get_tag_address(session['user_id'])])
             if len(tag_address) < 10:
                 # 未Bind時は警告画面を表示する
@@ -144,7 +151,7 @@ class IndexPage(TwitterClass, DataBase):
             oldest_uuid = self.get_oldest_uuid(session['user_id'])
 
             return (session['screen'], deposit_balance, withdraw_balance, inner_balance, total_balance,
-                    tag_amount, self.config.account_pubkey, tag_address, oldest_uuid, inner_his,
+                    deposit_info, tag_address, oldest_uuid, inner_his,
                     deposit_his, withdraw_his)
 
         elif select_page == 'withdraw.html':
@@ -246,6 +253,17 @@ class IndexPage(TwitterClass, DataBase):
                     self.obj.tip.request(command='account/history/delete', data={"uuid": result['uuid']})
                     return "danger", "Failed!", e
             return "success", "Success!", "converted, check with xembook!"
+
+        elif select_page == 'setting.html':
+            deposit_allow_user = ("namuyan_mine", "nyatla")
+            if session['screen'] not in deposit_allow_user:
+                return "danger", "Stop!", 'You are not deposit_allow_user.'
+
+            allow_screen = self.escape_str(req.get_param('screen'))
+            twitter_id = self.get_user_data(screen=allow_screen).id
+            user_id = self.twitter_to_user_id(twitter_id=twitter_id, screen=allow_screen)
+            self.add_deposit_permission(user_id)
+            return "success", "Success!", "Add user @%s." % allow_screen
 
         elif select_page == 'template.html':
             pass

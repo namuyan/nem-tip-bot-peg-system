@@ -33,7 +33,7 @@ class IncomingPolling(DataBase):
 
     def _run(self):
         time_span = 0.02 if self.config.node[0] in LOCAL_IP_ADDRESS else 0.1
-        divide = 1000
+        divide = 1500
         error = count = announce = 0
         block_data = self.read_block_file()
         logging.info("# start income loop %ssec %sdiv" % (time_span, divide))
