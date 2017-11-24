@@ -48,6 +48,7 @@ GETメソッドでsetting.htmlにアクセスします。
 * [アドレス作成](http://www.nukowallet.com/)
 * [INSTALL](INSTALL.md)
 * [Tipnem](https://namuyan.github.io/nem-tip-bot/index)
+* [tipで受け取ったnekoniumモザイク(ペグトークン)をnekoniumに変換する方法](http://harmonir.hatenablog.jp/entry/2017/11/24/233745)
 
 ## 履歴
 * 2017/11/24 1万ペグ追加 ~~15000NUKO~~ ⇒ 25000NUKO
