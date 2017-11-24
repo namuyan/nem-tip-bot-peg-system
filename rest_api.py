@@ -126,7 +126,7 @@ class IndexPage(TwitterClass, DataBase):
                 deposit_info = "{} NUKO<br>{}".format(tag_amount, self.config.account_pubkey)
             else:
                 # 出金許可無し
-                deposit_info = '<span style="color:red;">CAUTION! You have not deposit permission.</span>'
+                deposit_info = '<span style="color:red;">CAUTION! You have no deposit permission.</span>'
 
             tag_address = "<br>".join([a[:30] + "..." for a in self.get_tag_address(session['user_id'])])
             if len(tag_address) < 10 and deposit_permission:
