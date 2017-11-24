@@ -120,18 +120,23 @@ class IndexPage(TwitterClass, DataBase):
             withdraw_balance = display(withdraw_balance, 6)
             inner_balance = display(inner_balance, 6)
 
-            if self.deposit_permission(session['user_id']):
+            deposit_permission = self.deposit_permission(session['user_id'])
+            if deposit_permission:
                 tag_amount = display(session['user_id'], 18)
                 deposit_info = "{} NUKO<br>{}".format(tag_amount, self.config.account_pubkey)
             else:
+                # 出金許可無し
                 deposit_info = '<span style="color:red;">CAUTION! You have not deposit permission.</span>'
 
             tag_address = "<br>".join([a[:30] + "..." for a in self.get_tag_address(session['user_id'])])
-            if len(tag_address) < 10:
+            if len(tag_address) < 10 and deposit_permission:
                 # 未Bind時は警告画面を表示する
                 tag_address = '<span style="color:red;">Please deposit the amount to this address FIRST!</span>'
                 tag_address += '<a href="https://github.com/namuyan/nem-tip-bot-peg-system/blob/' \
                                'master/HELP.md">help</a>'
+            elif len(tag_address) < 10 and not deposit_permission:
+                # 未Bindだが出金許可が無い
+                tag_address = '<span style="color:blue;">You can not add address. This is normal.</span>'
 
             inner_his = self.inner_balance(user_id=session['user_id'], summary=False)
             deposit_his = self.deposit_balance(user_id=session['user_id'], summary=False)
