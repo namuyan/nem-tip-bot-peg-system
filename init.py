@@ -37,7 +37,7 @@ database_dict = {
     ],
     "bind_user": [
         'user_id INT UNSIGNED NOT NULL',
-        'twitter_id BIGINT UNSIGNED NOT NULL',
+        'twitter_id BIGINT UNSIGNED NOT NULL UNIQUE',
         'screen VARCHAR(255)',
         'deposit_permission TINYINT DEFAULT 0',
         'time INT UNSIGNED',
